@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <map>
+#include <mutex>
 
 using std::cout;
 using std::endl;
@@ -10,6 +11,7 @@ class SmartCache{
 private:
     Factory factory_;
     std::map<Id, std::weak_ptr<Object>> cache_;
+    std::mutex access_mutex;
 
     std::shared_ptr<Object> addObjectWithId(const Id& id){
         auto raw_ptr = factory_(id);
@@ -22,6 +24,8 @@ public:
     SmartCache(Factory factory_0) : factory_(factory_0) {}
 
     std::shared_ptr<Object> operator [] (const Id& id){
+
+        std::lock_guard<std::mutex> access_lock(access_mutex);
     	
         auto your_object = cache_.find(id);
 
